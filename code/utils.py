@@ -14,21 +14,21 @@ import os
 
 
 
-class SpriteDataset(Dataset):
-    """Sprite dataset class"""
-    def __init__(self, root, transform, target_transform):
-        self.images = np.load(os.path.join(root, "sprites_1788_16x16.npy"))
-        self.labels = np.load(os.path.join(root, "sprite_labels_nc_1788_16x16.npy"))
-        self.transform = transform
-        self.target_transform = target_transform
+# class SpriteDataset(Dataset):
+#     """Sprite dataset class"""
+#     def __init__(self, root, transform, target_transform):
+#         self.images = np.load(os.path.join(root, "sprites_1788_16x16.npy"))
+#         self.labels = np.load(os.path.join(root, "sprite_labels_nc_1788_16x16.npy"))
+#         self.transform = transform
+#         self.target_transform = target_transform
     
-    def __getitem__(self, idx):
-        image = self.transform(self.images[idx])
-        label = self.target_transform(self.labels[idx])
-        return image, label
+#     def __getitem__(self, idx):
+#         image = self.transform(self.images[idx])
+#         label = self.target_transform(self.labels[idx])
+#         return image, label
 
-    def __len__(self):
-        return len(self.images)
+#     def __len__(self):
+#         return len(self.images)
 
 def generate_animation(intermediate_samples, t_steps, fname, n_images_per_row=8):
     """Generates animation and saves as a gif file for given intermediate samples"""
