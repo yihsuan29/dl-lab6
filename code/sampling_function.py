@@ -2,8 +2,6 @@
 The code is modified from: https://github.com/byrkbrk/conditional-ddpm
 """
 
-
-
 import torch
 import numpy as np
 
