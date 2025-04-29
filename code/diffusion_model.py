@@ -14,6 +14,7 @@ import os
 from models import ContextUnet
 # from utils import SpriteDataset, generate_animation
 from dataset import IclevrDataset
+import json
 
 
 
@@ -26,7 +27,7 @@ class DiffusionModel(nn.Module):
         self.checkpoint_name = checkpoint_name
         self.nn_model = self.initialize_nn_model(self.dataset_name, checkpoint_name, self.file_dir, self.device)
         self.create_dirs(self.file_dir)
-        self.test_sample = IclevrDataset(file_root="../file", data_root="../iclevr", mode="test")
+
 
     def train(self, batch_size=64, n_epoch=32, lr=1e-3, timesteps=500, beta1=1e-4, beta2=0.02,
               checkpoint_save_dir=None, image_save_dir=None):
@@ -69,11 +70,11 @@ class DiffusionModel(nn.Module):
             scheduler.step()
             print(f"Epoch: {epoch}, loss: {ave_loss}")
             
-            if epoch % 5 == 0:
+            if (epoch+1) % 5 == 0:
                 self.generate(n_samples=32, n_images_per_row=8, timesteps=timesteps, 
                               beta1=beta1, beta2=beta2, epoch=epoch)
             
-            if epoch % 10 == 0:
+            if (epoch+1) % 10 == 0:
                 self.save_tensor_images(x, x_pert, self.get_x_unpert(x_pert, t, pred_noise, ab_t), 
                                         epoch, self.file_dir, image_save_dir)
                 self.save_checkpoint(self.nn_model, optim, scheduler, epoch, ave_loss, 
@@ -333,13 +334,22 @@ class DiffusionModel(nn.Module):
                 device = "cpu"
         return torch.device(device)
     
-    # def get_custom_context(self, n_samples, n_classes, device):
-    #     """Returns custom context in one-hot encoded form"""
+    def get_custom_context(self, n_samples, n_classes, device):
+        """Returns custom context in one-hot encoded form"""
         # context = []
         # for i in range(n_classes - 1):
         #     context.extend([i]*(n_samples//n_classes))
         # context.extend([n_classes - 1]*(n_samples - len(context)))
         # return torch.nn.functional.one_hot(torch.tensor(context), n_classes).float().to(device)
+        data = json.load(open('../file/test.json'))
+        object_dict = json.load(open('../file/objects.json'))
+
+        labels = torch.zeros(len(data), 24)
+        for i in range(len(data)):
+            for obj in data[i]:
+                labels[i][object_dict[obj]] = 1
+        return labels.to(self.device)
+    
     
     def generate(self, n_samples, n_images_per_row, timesteps, beta1, beta2, epoch= None):
         """Generates x0 and intermediate samples xi via DDPM, 
@@ -349,10 +359,9 @@ class DiffusionModel(nn.Module):
         os.makedirs(root, exist_ok=True)
         
         x0, intermediate_samples, t_steps = self.sample_ddpm(n_samples,
-                                                            #  self.get_custom_context(
-                                                            #      n_samples, self.nn_model.n_cfeat, 
-                                                            #      self.device),
-                                                             self.test_sample.to(self.device),
+                                                             self.get_custom_context(
+                                                                 n_samples, self.nn_model.n_cfeat, 
+                                                                 self.device),
                                                              timesteps,
                                                              beta1,
                                                              beta2,)

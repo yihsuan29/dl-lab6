@@ -66,3 +66,6 @@ class evaluation_model():
             out = self.resnet18(images)
             acc = self.compute_acc(out.cpu(), labels.cpu())
             return acc
+
+if __name__ == '__main__':
+    evaluation_model()
