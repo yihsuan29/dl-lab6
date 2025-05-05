@@ -1,4 +1,9 @@
 iclevr/
+checkpoints/
+saved-images/
+generated-images/
+results/
+images/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
